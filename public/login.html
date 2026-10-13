@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+  <title>HotSport Inventory — Login</title>
+  <meta name="description" content="Sign in to HotSport Inventory — Admin, Manager or Seller" />
+  <meta name="theme-color" content="#c41e3a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="HotSport" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <script src="/js/i18n.js"></script>
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <div class="lang-switch login-lang" id="langSwitchLogin" role="group" aria-label="Language">
+      <button type="button" class="lang-btn" data-lang="fr">FR</button>
+      <button type="button" class="lang-btn" data-lang="ar">ع</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <div class="login-brand">
+      <img src="/icons/icon-192.png" alt="HotSport" width="64" height="64" />
+      <h1 id="loginTitle">HotSport Inventory</h1>
+      <p id="loginSub">Admin · Manager · Seller · <a href="https://hotsport.tn/" target="_blank" rel="noopener">hotsport.tn</a></p>
+    </div>
+    <form id="loginForm">
+      <label><span id="labelDemo">Demo account</span>
+        <select id="demoAccount">
+          <option value="admin@hotsport.tn|admin123">Admin — admin@hotsport.tn</option>
+          <option value="manager@hotsport.tn|manager123">Manager — manager@hotsport.tn</option>
+          <option value="seller@hotsport.tn|seller123" selected>Seller — seller@hotsport.tn</option>
+          <option value="cashier@hotsport.tn|cashier123">Cashier (Caisse 2) — cashier@hotsport.tn</option>
+          <option value="demo@hotsport.tn|demo1234">Legacy admin — demo@hotsport.tn</option>
+        </select>
+      </label>
+      <label><span id="labelEmail">Email</span>
+        <input type="email" name="email" id="emailInput" value="seller@hotsport.tn" required autocomplete="username" />
+      </label>
+      <label><span id="labelPassword">Password</span>
+        <input type="password" name="password" id="passwordInput" value="seller123" required autocomplete="current-password" />
+      </label>
+      <button type="submit" class="btn primary block" id="loginBtn">Enter demo</button>
+      <button type="button" class="btn outline block" id="installBtn" hidden style="margin-top:0.55rem">Install app</button>
+      <p class="hint" id="loginHint">Pick a role above. Admin: HR + approvals + settings. Manager: stock + HR. Seller: scan & sell.</p>
+      <p id="loginError" class="error" hidden></p>
+    </form>
+  </main>
+  <div class="toast" id="toast" hidden></div>
+  <div class="pwa-banner" id="pwaBanner" hidden>
+    <img src="/icons/icon-192.png" alt="" width="48" height="48" />
+    <div>
+      <strong>Install HotSport</strong>
+      <span>Works offline · scan & sell on phone</span>
+    </div>
+    <div class="pwa-actions">
+      <button type="button" class="dismiss" id="pwaDismiss">Later</button>
+      <button type="button" class="install" id="pwaInstall">Install</button>
+    </div>
+  </div>
+  <script src="/js/pwa.js"></script>
+  <script>
+    (function () {
+      const { getLang, setLang, t, applyDocument } = window.HS_I18N;
+
+      function paintLang() {
+        const lang = getLang();
+        applyDocument(lang);
+        document.querySelectorAll('.lang-btn').forEach((b) => {
+          b.classList.toggle('active', b.dataset.lang === lang);
+        });
+        document.getElementById('loginHint').textContent = t('loginHint');
+        document.getElementById('loginSub').innerHTML = t('loginSub') + ' · <a href="https://hotsport.tn/" target="_blank" rel="noopener">hotsport.tn</a>';
+        document.getElementById('loginBtn').textContent = t('enterDemo');
+        document.getElementById('labelEmail').textContent = t('email');
+        document.getElementById('labelPassword').textContent = t('password');
+        document.title = t('loginTitle');
+      }
+
+      document.getElementById('demoAccount').addEventListener('change', (e) => {
+        const [email, pass] = e.target.value.split('|');
+        document.getElementById('emailInput').value = email;
+        document.getElementById('passwordInput').value = pass;
+      });
+
+      document.getElementById('langSwitchLogin').addEventListener('click', (e) => {
+        const btn = e.target.closest('.lang-btn');
+        if (!btn) return;
+        setLang(btn.dataset.lang);
+        paintLang();
+      });
+
+      paintLang();
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') })
+        });
+        const data = await res.json();
+        if (!data.ok) {
+          const err = document.getElementById('loginError');
+          err.hidden = false;
+          err.textContent = data.message || t('loginFailed');
+          return;
+        }
+        location.href = '/app.html';
+      });
+    })();
+  </script>
+</body>
+</html>

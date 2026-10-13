@@ -1,0 +1,30 @@
+{
+  "name": "hotsport-stock",
+  "version": "1.0.0",
+  "description": "HotSport stock manager — MongoDB PWA ready to deploy",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node src/seed.js",
+    "seed:force": "node src/seed.js",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f app"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "qrcode": "^1.5.4",
+    "web-push": "^3.6.7"
+  }
+}

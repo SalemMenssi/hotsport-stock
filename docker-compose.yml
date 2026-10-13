@@ -1,0 +1,28 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - hotsport_mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "${PORT:-3090}:3090"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3090
+      MONGODB_URI: mongodb://mongo:27017/hotsport_stock
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production-please}
+      SEED_ON_START: ${SEED_ON_START:-true}
+      FORCE_SEED: ${FORCE_SEED:-false}
+      APP_URL: ${APP_URL:-http://localhost:3090}
+
+volumes:
+  hotsport_mongo_data:

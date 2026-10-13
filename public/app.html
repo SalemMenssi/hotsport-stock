@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+  <title>HotSport Inventory</title>
+  <meta name="description" content="HotSport stock, POS barcode scan, orders and HR — Tunisia" />
+  <meta name="theme-color" content="#c41e3a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="HotSport" />
+  <meta name="application-name" content="HotSport Inventory" />
+  <meta name="format-detection" content="telephone=no" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+  <script src="/js/i18n.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="/icons/icon-192.png" alt="" width="42" height="42" />
+        <div>
+          <strong>HotSport</strong>
+          <span id="brandSub">Inventory · Tunisia</span>
+        </div>
+      </div>
+      <nav id="nav" class="side-nav"></nav>
+      <div class="side-foot">
+        <div class="lang-switch" id="langSwitchSide" role="group" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang="fr">FR</button>
+          <button type="button" class="lang-btn" data-lang="ar">ع</button>
+          <button type="button" class="lang-btn" data-lang="en">EN</button>
+        </div>
+        <button type="button" class="btn ghost block" id="resetDemoBtn">
+          <i data-lucide="rotate-ccw"></i> <span data-i18n="resetDemo">Reset demo</span>
+        </button>
+        <button type="button" class="btn ghost block" id="logoutBtn">
+          <i data-lucide="log-out"></i> <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop" hidden></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" id="menuToggle" aria-label="Menu" aria-expanded="false" aria-controls="sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="top-title">
+          <p class="eyebrow" id="pageEyebrow">HotSport Tunisia</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <div class="lang-switch" id="langSwitchTop" role="group" aria-label="Language">
+            <button type="button" class="lang-btn" data-lang="fr">FR</button>
+            <button type="button" class="lang-btn" data-lang="ar">ع</button>
+            <button type="button" class="lang-btn" data-lang="en">EN</button>
+          </div>
+          <button type="button" class="btn outline" id="installBtn" hidden>
+            <i data-lucide="download"></i> <span data-i18n="install">Install</span>
+          </button>
+          <button type="button" class="bell-btn" id="notifyBtn" aria-label="Notifications">
+            <i data-lucide="bell"></i>
+            <span class="bell-badge" id="notifyBadge" hidden>0</span>
+          </button>
+          <span class="user-pill" id="userPill">
+            <i data-lucide="user"></i> <span id="userName">demo</span>
+          </span>
+        </div>
+      </header>
+      <section class="content" id="content"></section>
+    </main>
+  </div>
+
+  <div class="modal" id="appModal" hidden>
+    <div class="modal-panel" id="modalPanel">
+      <header class="modal-head">
+        <h3 id="modalTitle">Details</h3>
+        <button type="button" class="close" id="modalClose" aria-label="Close">×</button>
+      </header>
+      <div class="modal-body" id="modalBody"></div>
+      <footer class="modal-foot" id="modalFoot"></footer>
+    </div>
+  </div>
+
+  <div class="modal" id="adjustModal" hidden>
+    <div class="modal-panel">
+      <header class="modal-head">
+        <h3 id="adjustTitle">Adjust stock</h3>
+        <button type="button" class="close" id="adjustClose">×</button>
+      </header>
+      <form id="adjustForm" class="modal-body">
+        <input type="hidden" id="adjustId" />
+        <label><span data-i18n="qtyChange">Quantity change</span><input type="number" id="adjustQty" step="1" required /></label>
+        <label><span data-i18n="reason">Reason</span>
+          <select id="adjustReason">
+            <option value="receivedStock" data-i18n="receivedStock">Received stock</option>
+            <option value="soldOffline" data-i18n="soldOffline">Sold offline</option>
+            <option value="damaged" data-i18n="damaged">Damaged / loss</option>
+            <option value="inventoryCount" data-i18n="inventoryCount">Inventory count</option>
+            <option value="other" data-i18n="other">Other</option>
+          </select>
+        </label>
+        <label><span data-i18n="note">Note</span><input type="text" id="adjustNote" /></label>
+        <button type="submit" class="btn primary block" data-i18n="saveAdjust">Save adjustment</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="live-scan" id="liveScan" hidden>
+    <video id="liveScanVideo" playsinline webkit-playsinline muted autoplay></video>
+    <canvas id="liveScanCanvas" hidden></canvas>
+    <div class="live-scan-aim"></div>
+    <p class="live-scan-hint" id="liveScanHint"></p>
+    <div class="live-scan-actions">
+      <button type="button" class="btn outline" id="liveScanClose">OK</button>
+      <label class="btn dark" id="liveScanShotLbl">
+        <input type="file" id="scanCapture" accept="image/*" capture="environment" />
+        <span data-i18n="takePhoto">Photo</span>
+      </label>
+      <button type="button" class="btn primary" id="liveScanPass" disabled></button>
+    </div>
+    <div id="qrFileHost" hidden></div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <div class="pwa-banner" id="pwaBanner" hidden>
+    <img src="/icons/icon-192.png" alt="" width="48" height="48" />
+    <div>
+      <strong data-i18n="installApp">Install HotSport</strong>
+      <span data-i18n="installSub">App with orders & stock</span>
+    </div>
+    <div class="pwa-actions">
+      <button type="button" class="dismiss" id="pwaDismiss" data-i18n="later">Later</button>
+      <button type="button" class="install" id="pwaInstall" data-i18n="install">Install</button>
+    </div>
+  </div>
+
+  <div class="perm-gate" id="permGate" hidden>
+    <div class="perm-card">
+      <p class="eyebrow">HotSport</p>
+      <h2 id="permTitle">Autorisations</h2>
+      <p id="permBody" class="page-sub"></p>
+      <ul class="perm-list" id="permList"></ul>
+      <button type="button" class="btn primary block" id="permAllow"></button>
+      <button type="button" class="btn outline block" id="permLater"></button>
+    </div>
+  </div>
+
+  <div class="coach" id="coach" hidden>
+    <div class="coach-card">
+      <p class="eyebrow" id="coachEyebrow">HotSport</p>
+      <h2 id="coachTitle">Quick tips</h2>
+      <ol id="coachList"></ol>
+      <button type="button" class="btn primary block" id="coachOk">OK</button>
+    </div>
+  </div>
+
+  <script src="/js/pwa.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
